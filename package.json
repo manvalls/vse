@@ -1,14 +1,12 @@
 {
   "name": "vse",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A very simple event emitter, with support for vz.yielded",
   "main": "main.js",
   "dependencies": {
     "vz.rand": ""
   },
-  "devDependencies": {
-    
-  },
+  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git://github.com/manvalls/vse.git"
