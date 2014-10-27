@@ -13,15 +13,14 @@ No piece of software is ever completed, feel free to contribute and be humble.
 ```javascript
 var Vse = require('vse'),
     walk = require('vz.walk'),
-    vse = new Vse(),
-    cb;
+    vse = new Vse();
 
-vse.on('foo',cb = function(data){
+vse.on('foo',function callback(data){
   console.log(data);
+  vse.detach('foo',callback);
 });
 
 vse.fire('foo','bar'); // bar
-vse.detach('foo',cb);
 
 walk(function*(){
   var data = yield vse.until('foo');
