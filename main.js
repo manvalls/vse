@@ -100,6 +100,14 @@ bag = {
     
     if(!hds) return false;
     
+    if(!handler){
+      delete this[number][event];
+      delete this[yieldeds][event];
+      delete this[handlers][event];
+      
+      return true;
+    }
+    
     i = hds.indexOf(handler);
     
     if(i != -1){
@@ -120,6 +128,8 @@ bag = {
         
         yds,
         i;
+    
+    this.fire('error',e);
     
     for(i = 0;i < events.length;i++){
       event = events[i];
