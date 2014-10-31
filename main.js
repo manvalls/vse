@@ -89,7 +89,7 @@ bag = {
     ret = [];
     ctx = this[context];
     
-    for(i = 0;i < hds.length;i++) ret.push(hds[i].call(ctx,data));
+    for(i = 0;i < hds.length;i++) ret.push(hds[i].call(ctx,data,event));
     
     return ret;
   }},
@@ -155,7 +155,7 @@ bag = {
 Object.defineProperties(Vse.prototype,bag);
 
 Vse.make = function(obj,ctx){
-  Object.defineProperties(obj);
+  Object.defineProperties(obj,bag);
   Vse.call(obj,ctx);
 };
 
