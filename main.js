@@ -8,6 +8,11 @@ var Yielded,
     handlers = Su(),
     context = Su(),
     
+    proxy = Su(),
+    proxiedHandlers = Su(),
+    proxied = Su(),
+    useCapture = Su(),
+    
     bag;
 
 module.exports = Vse = function Vse(ctx){
@@ -157,6 +162,111 @@ Object.defineProperties(Vse.prototype,bag);
 Vse.make = function(obj,ctx){
   Object.defineProperties(obj,bag);
   Vse.call(obj,ctx);
+};
+
+// Proxy
+
+//// EventEmitter
+
+function onEventHandledEEArr(event){
+  var pd = this[proxied],
+      p = this;
+  
+  function onEvent(){
+    p.fire(event,arguments);
+  }
+  
+  p[proxiedHandlers][event] = onEvent;
+  pd.on(event,onEvent);
+}
+
+function onEventHandledEE(event){
+  var pd = this[proxied],
+      p = this;
+  
+  function onEvent(data){
+    p.fire(event,data);
+  }
+  
+  p[proxiedHandlers][event] = onEvent;
+  pd.on(event,onEvent);
+}
+
+function onEventUnhandledEE(event){
+  var pd = this[proxied],
+      p = this,
+      onEvent;
+  
+  if(onEvent = p[proxiedHandlers][event]){
+    pd.removeListener(event,onEvent);
+    delete p[proxiedHandlers][event];
+  }
+}
+
+//// EventTarget
+
+function onEventHandledET(event){
+  this[proxied].addEventListener(event,onEventET,this[useCapture]);
+}
+
+function onEventUnhandledET(event){
+  this[proxied].removeEventListener(event,onEventET,this[useCapture]);
+}
+
+function onEventHandledETS(event){
+  this[proxied].addEventListener(event,onEventETS,this[useCapture]);
+}
+
+function onEventUnhandledETS(event){
+  this[proxied].removeEventListener(event,onEventETS,this[useCapture]);
+}
+
+function onEventET(e){
+  if(this[proxy].fire(e.type,e).indexOf(false) != -1){
+    e.preventDefault();
+    e.stopPropagation();
+  }
+}
+
+function onEventETS(e){
+  this[proxy].fire(e.type,e);
+}
+
+//// Proxy function
+
+Vse.proxy = function(obj,p,strict,capture){
+  if(obj[proxy]) return obj[proxy];
+  
+  if(p && p[proxied]) throw 'Provided Vse is already proxying another object';
+  
+  p = p || new Vse();
+  p[proxied] = obj;
+  obj[proxy] = p;
+  
+  if(obj.on){
+    p[proxiedHandlers] = {};
+    
+    if(strict) p.on('event-handled',onEventHandledEEArr);
+    else p.on('event-handled',onEventHandledEE);
+    p.on('event-unhandled',onEventUnhandledEE);
+    
+    return p;
+  }
+  
+  if(obj.addEventListener){
+    p[useCapture] = capture || false;
+    
+    if(strict){
+      p.on('event-handled',onEventHandledETS);
+      p.on('event-unhandled',onEventUnhandledETS);
+    }else{
+      p.on('event-handled',onEventHandledET);
+      p.on('event-unhandled',onEventUnhandledET);
+    }
+    
+    return p;
+  }
+  
 };
 
 Yielded = require('vz.yielded');
