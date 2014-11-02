@@ -269,4 +269,6 @@ Vse.proxy = function(obj,p,strict,capture){
   
 };
 
+// Yielded
+
 Yielded = require('vz.yielded');
