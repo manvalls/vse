@@ -1,6 +1,7 @@
 
 var Yielded,
     Vse,
+    walk,
     Su = require('vz.rand').Su,
     
     number = Su(),
@@ -94,7 +95,7 @@ bag = {
     ret = [];
     ctx = this[context];
     
-    for(i = 0;i < hds.length;i++) ret.push(hds[i].call(ctx,data,event));
+    for(i = 0;i < hds.length;i++) ret.push(walk(hds[i],[data,event],ctx));
     
     return ret;
   }},
@@ -269,6 +270,7 @@ Vse.proxy = function(obj,p,strict,capture){
   
 };
 
-// Yielded
+// Late imports
 
+walk = require('vz.walk');
 Yielded = require('vz.yielded');

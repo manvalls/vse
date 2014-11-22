@@ -4,7 +4,8 @@
   "description": "A very simple event emitter, with support for vz.yielded",
   "main": "main.js",
   "dependencies": {
-    "vz.rand": ""
+    "vz.rand": "",
+    "vz.walk": ""
   },
   "devDependencies": {},
   "repository": {
