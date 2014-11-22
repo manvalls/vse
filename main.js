@@ -238,7 +238,7 @@ function onEventETS(e){
 Vse.proxy = function(obj,p,strict,capture){
   if(obj[proxy]) return obj[proxy];
   
-  if(p && p[proxied]) throw 'Provided Vse is already proxying another object';
+  if(p && p[proxied]) throw new Error('Provided Vse is already proxying another object');
   
   p = p || new Vse();
   p[proxied] = obj;
