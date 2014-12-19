@@ -7,6 +7,7 @@ var Yielded,
     number = Su(),
     yieldeds = Su(),
     handlers = Su(),
+    extras = Su(),
     context = Su(),
     
     proxy = Su(),
@@ -20,6 +21,7 @@ module.exports = Vse = function Vse(ctx){
   this[number] = {};
   this[yieldeds] = {};
   this[handlers] = {};
+  this[extras] = {};
   this[context] = ctx || this;
 };
 
@@ -29,6 +31,7 @@ function init(vse,event){
     vse[number][event] = 0;
     vse[yieldeds][event] = [];
     vse[handlers][event] = [];
+    vse[extras][event] = [];
     return true;
   }
   
@@ -41,6 +44,7 @@ function destroy(vse,event,n){
     delete vse[number][event];
     delete vse[yieldeds][event];
     delete vse[handlers][event];
+    delete vse[extras][event];
     
     return true;
   }
@@ -51,11 +55,14 @@ function destroy(vse,event,n){
 
 bag = {
   
-  on: {value: function(event,handler){
+  on: {value: function(event,handler,extra){
     var fire = init(this,event);
+    
+    extra = extra || event;
     
     this[number][event]++;
     this[handlers][event].push(handler);
+    this[extras][event].push(extra);
     
     if(fire) this.fire('event-handled',event);
   }},
@@ -73,7 +80,7 @@ bag = {
   }},
   
   fire: {value: function(event,data){
-    var yds,hds,i,ret,ctx;
+    var yds,hds,exs,i,ret,ctx;
     
     if(!this[number][event]) return [];
     
@@ -92,16 +99,19 @@ bag = {
     // Handlers
     
     hds = this[handlers][event].slice();
+    exs = this[extras][event].slice();
+    
     ret = [];
     ctx = this[context];
     
-    for(i = 0;i < hds.length;i++) ret.push(walk(hds[i],[data,event],ctx));
+    for(i = 0;i < hds.length;i++) ret.push(walk(hds[i],[data,exs[i]],ctx));
     
     return ret;
   }},
   
   detach: {value: function(event,handler){
     var hds = this[handlers][event],
+        exs = this[extras][event],
         i;
     
     if(!hds) return false;
@@ -110,6 +120,7 @@ bag = {
       delete this[number][event];
       delete this[yieldeds][event];
       delete this[handlers][event];
+      delete this[extras][event];
       
       return true;
     }
@@ -118,6 +129,8 @@ bag = {
     
     if(i != -1){
       hds.splice(i,1);
+      exs.splice(i,1);
+      
       if(destroy(this,event,1)) this.fire('event-unhandled',event);
       return true;
     }
@@ -128,6 +141,7 @@ bag = {
   throw: {value: function(error){
     var events = Object.keys(this[yieldeds]),
         event,
+        ret,
         
         ydsCol = [],
         eCol = [],
@@ -135,13 +149,15 @@ bag = {
         yds,
         i;
     
-    this.fire('error',e);
+    ret = this.fire('error',e);
     
     for(i = 0;i < events.length;i++){
       event = events[i];
+      
       ydsCol.push(this[yieldeds][event]);
-      this[yieldeds][event] = [];
       eCol.push(event);
+      
+      this[yieldeds][event] = [];
     }
     
     while(yds = ydsCol.shift()){
@@ -150,6 +166,7 @@ bag = {
       if(destroy(this,event,yds.length)) this.fire('event-unhandled',event);
     }
     
+    return ret;
   }},
   
   isHandled: {value: function(event){
