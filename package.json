@@ -1,6 +1,6 @@
 {
   "name": "vse",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "A very simple event emitter, with support for vz.yielded",
   "main": "main.js",
   "dependencies": {
